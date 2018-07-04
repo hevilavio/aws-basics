@@ -1,3 +1,4 @@
+
 buildscript {
     repositories {
         mavenCentral()
@@ -6,16 +7,28 @@ buildscript {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.2.RELEASE")
     }
 }
+plugins {
+    id "com.palantir.docker-run" version "0.20.0"
+}
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'com.palantir.docker'
 
 bootJar {
     baseName = 'aws-hello'
     version =  '0.1.0'
+}
+
+docker {
+    dependsOn build
+    //todo - conseguir um jeito mais pratico de tagear no docker
+    name "aws-basics:1.1"
+    files bootJar.archivePath
+    buildArgs(['JAR_FILE': "${bootJar.archiveName}"])
 }
 
 repositories {
@@ -27,7 +40,8 @@ targetCompatibility = 1.8
 
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
+    compile("org.apache.logging.log4j:log4j-api:2.8.2")
+    compile("org.apache.logging.log4j:log4j-core:2.8.2")
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('com.jayway.jsonpath:json-path')
 }
-
